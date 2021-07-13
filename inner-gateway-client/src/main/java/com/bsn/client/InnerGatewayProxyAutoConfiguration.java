@@ -1,36 +1,47 @@
 package com.bsn.client;
 
 import com.bsn.client.httpClient.CustomHttpClient;
-import com.bsn.client.httpClient.HttpClientWrapper;
 import com.bsn.client.properties.ProxyProperties;
 import com.bsn.client.restTemplate.RestTemplateProxyInterceptor;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import javax.annotation.PostConstruct;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @ConditionalOnProperty(name = "proxy.enable")
 @EnableConfigurationProperties({ProxyProperties.class})
 //@ImportAutoConfiguration(value = {SentinelAdapterV1Configuration.class, SentinelAdapterV2ServletConfiguration.class, SentinelAdapterV2ReactConfiguration.class})
-public class InnerGatewayProxyAutoConfiguration {
+public class InnerGatewayProxyAutoConfiguration implements ApplicationContextAware {
 
-    private final ScheduledExecutorService connectionManagerTimer =
-            Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder().setNameFormat("HttpConnectionManager-%d").setDaemon(true).build());
+//    private final ScheduledExecutorService connectionManagerTimer =
+//            Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder().setNameFormat("HttpConnectionManager-%d").setDaemon(true).build());
 
     private CloseableHttpClient httpClient;
+
+    private ApplicationContext applicationContext;
+
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+//    private SpringBeanUtil springBeanUtil;
 
 //    @Autowired(required = false)
 //    private FeignDecoderLogTemplate feignDecoderLogTemplate;
@@ -53,22 +64,25 @@ public class InnerGatewayProxyAutoConfiguration {
 //        return normalRestTemplate;
 //    }
 
-    @Bean
-    @ConditionalOnMissingBean({RestTemplate.class})
-    public RestTemplate restTemplate(ProxyProperties proxyProperties) {
-        SimpleClientHttpRequestFactory simpleClientHttpRequestFactory = new SimpleClientHttpRequestFactory();
-        /**
-         * 设置连接建立超时时间为5s
-         */
-        simpleClientHttpRequestFactory.setConnectTimeout(5000);
-        /**
-         * 设置读超时时间为10s
-         */
-        simpleClientHttpRequestFactory.setReadTimeout(10000);
-        RestTemplate restTemplate = new RestTemplate(simpleClientHttpRequestFactory);
-        restTemplate.getInterceptors().add(new RestTemplateProxyInterceptor(proxyProperties));
-        return restTemplate;
+//    @Bean
+//    public SpringBeanUtil springBeanUtil() {
+//        springBeanUtil = new SpringBeanUtil();
+//        return springBeanUtil;
+//    }
+
+    @PostConstruct
+    public void init() {
+        ProxyProperties proxyProperties = applicationContext.getBean(ProxyProperties.class);
+        Objects.requireNonNull(proxyProperties,"proxy bean could not found!");
+        // 获取RestTemplate实例列表，加入拦截器
+        Map<String, RestTemplate> restTemplateMap = applicationContext.getBeansOfType(RestTemplate.class);
+        if (!CollectionUtils.isEmpty(restTemplateMap)) {
+            for (Map.Entry<String, RestTemplate> entry : restTemplateMap.entrySet()) {
+                entry.getValue().getInterceptors().add(new RestTemplateProxyInterceptor(proxyProperties));
+            }
+        }
     }
+
 
     @Bean
     @ConditionalOnClass({HttpClient.class})
