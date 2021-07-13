@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.xes.bsn</groupId>
+    <artifactId>components</artifactId>
+    <version>1.1.0</version>
+    <packaging>pom</packaging>
+
+
+    <modules>
+        <!--<module>tracing-component</module>-->
+        <!--<module>tracing-commons</module>-->
+        <!--<module>zipkin-server-plugins</module>-->
+        <!--<module>sign-validation</module>-->
+        <!--<module>trend-deploy-component</module>-->
+        <!--<module>xesapp-common</module>-->
+        <!--<module>xes-feign</module>-->
+        <!--<module>sentinel-adapter</module>-->
+        <!--<module>sentinel-adapter</module>-->
+        <module>inner-gateway-client</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <repositories>
+        <repository>
+            <id>xesapp-nexus</id>
+            <name>maven-central</name>
+            <url>http://39.96.133.237:8081/repository/maven-public</url>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>xesapp-nexus</id>
+            <name>Nexus Release Repository</name>
+            <url>http://59.151.109.88:8081/nexus/content/repositories/xesapp-release</url>
+        </repository>
+        <snapshotRepository>
+            <id>xesapp-nexus</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>http://59.151.109.88:8081/nexus/content/repositories/xesapp-snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
+</project>
