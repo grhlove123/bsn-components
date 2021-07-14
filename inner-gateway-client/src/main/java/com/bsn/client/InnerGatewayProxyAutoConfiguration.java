@@ -89,8 +89,8 @@ public class InnerGatewayProxyAutoConfiguration implements ApplicationContextAwa
     public HttpClient httpClient(ProxyProperties proxyProperties) {
         HttpClientBuilder builder = HttpClientBuilder.create();
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        cm.setMaxTotal(100);
-        cm.setDefaultMaxPerRoute(100);
+        cm.setMaxTotal(500);
+        cm.setDefaultMaxPerRoute(500);
         builder.setConnectionManager(cm);
         HttpClient httpClient = builder.build();
         return new CustomHttpClient(httpClient, proxyProperties);
