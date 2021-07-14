@@ -3,15 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <parent>
-        <artifactId>bsn-components</artifactId>
-        <groupId>com.xes.bsn</groupId>
-        <version>1.1.0</version>
-    </parent>
 
     <modelVersion>4.0.0</modelVersion>
+    <groupId>com.xes.bsn</groupId>
     <artifactId>inner-gateway-client</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <properties>
         <lombok.version>1.16.14</lombok.version>
         <spring.cloud.version>Hoxton.SR5</spring.cloud.version>
@@ -100,4 +96,16 @@
         </plugins>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>xesapp-nexus</id>
+            <name>Nexus Release Repository</name>
+            <url>http://59.151.109.88:8081/nexus/content/repositories/xesapp-release</url>
+        </repository>
+        <snapshotRepository>
+            <id>xesapp-nexus</id>
+            <name>Nexus Snapshot Repository</name>
+            <url>http://59.151.109.88:8081/nexus/content/repositories/xesapp-snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
