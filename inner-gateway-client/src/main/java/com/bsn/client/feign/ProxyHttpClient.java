@@ -8,10 +8,9 @@ import feign.Request;
 import feign.Response;
 import feign.httpclient.ApacheHttpClient;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.HttpClient;
 import org.slf4j.MDC;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,7 +23,7 @@ import java.util.*;
  * @author liuyong4 2019/4/10 11:42
  **/
 @Slf4j
-public class ProxyHttpClient implements Client  {
+public class ProxyHttpClient implements Client {
     private static final String REQUEST_ID_KEY = "REQUEST_ID";
     private static final String PROXY_HEADER = "target-domain";
     private static final String REQUEST_ID_HEADER = "x-request-id";
@@ -38,25 +37,20 @@ public class ProxyHttpClient implements Client  {
 
     private ApacheHttpClient apacheHttpClient;
 
-    private ProxyProperties proxyProperties;
+    private ProxyProperties customProxyProperties;
 
-    public ProxyHttpClient(HttpClient httpClient, ProxyProperties proxyProperties) {
-        this.apacheHttpClient = new ApacheHttpClient(httpClient);
-        this.proxyProperties = proxyProperties;
+    public ProxyHttpClient(ApacheHttpClient apacheHttpClient, ProxyProperties customProxyProperties) {
+        this.apacheHttpClient = apacheHttpClient;
+        this.customProxyProperties = customProxyProperties;
+//        customProxyProperties.check();
     }
 
     @Override
     public Response execute(Request request, Request.Options options) throws IOException {
-        try {
-            //是否直接通过指定的url调用,而非服务发现
-            Boolean directCall = !MarkedLoadBalancerFeignClient.LOAD_BALANCE_FLAG.get();
-            if (directCall && proxyProperties.getEnable()) {
-                request = rewriteToProxy(request);
-            }
-            return apacheHttpClient.execute(request, options);
-        } finally {
-            MarkedLoadBalancerFeignClient.LOAD_BALANCE_FLAG.remove();
+        if (customProxyProperties.getEnable()) {
+            request = rewriteToProxy(request);
         }
+        return apacheHttpClient.execute(request, options);
     }
 
     private Request rewriteToProxy(Request request) {
@@ -77,7 +71,7 @@ public class ProxyHttpClient implements Client  {
         newHeader.putAll(request.headers());
 
         addExtraHeader(host, request, newHeader);
-        if (proxyProperties.getIgnoreDomains().contains(targetDomain)) {
+        if (customProxyProperties.getIgnoreDomains().contains(targetDomain)) {
             return request;
         }
         if (uri.getPort() != -1) {
@@ -85,29 +79,16 @@ public class ProxyHttpClient implements Client  {
         }
         newHeader.put(PROXY_HEADER, Lists.newArrayList(targetDomain));
         addTraceHeader(request, newHeader);
-        addOriginHeader(request, newHeader);
 
-        String proxyUrl = uri.toString().replace(targetDomain, proxyProperties.getBaseURL());
+        String proxyUrl = uri.toString().replace(targetDomain, customProxyProperties.getBaseURL());
         return Request.create(request.method(), proxyUrl, newHeader, request.body(), request.charset());
     }
 
     private void addTraceHeader(Request request, Map<String, Collection<String>> newHeader) {
         String requestId = MDC.get(REQUEST_ID_KEY);
-        if (StringUtils.isNotBlank(requestId)) {
-            newHeader.put(REQUEST_ID_HEADER, Lists.newArrayList(proxyProperties.getTracePrefix() + "-" + requestId));
+        if (StringUtils.isEmpty(requestId)) {
+            newHeader.put(REQUEST_ID_HEADER, Lists.newArrayList(customProxyProperties.getTracePrefix() + "-" + requestId));
         }
-    }
-
-    private void addOriginHeader(Request request, Map<String, Collection<String>> newHeader) {
-        if (CollectionUtils.isEmpty(proxyProperties.getOriginUrls())) {
-            return;
-        }
-
-        String url = request.url();
-        final String xesOrigin = proxyProperties.getXesOrigin();
-        proxyProperties.getOriginUrls().stream().filter(url::contains).findFirst().ifPresent(ignore -> {
-            newHeader.put("xes-origin", Lists.newArrayList(xesOrigin));
-        });
     }
 
     private void addExtraHeader(String originDomain, Request request, Map<String, Collection<String>> newHeader) {

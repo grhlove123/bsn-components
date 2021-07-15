@@ -16,12 +16,12 @@ import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
 import static feign.Util.decodeOrDefault;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * @author liuyong4 2019/4/3 17:47
@@ -69,7 +69,7 @@ public class InternalUtil {
     public static String getRawStr(byte[] bodyData) {
         String rawContent = "";
         if (Objects.nonNull(bodyData) && bodyData.length > 0) {
-            rawContent = decodeOrDefault(bodyData, UTF_8, "");
+            rawContent = decodeOrDefault(bodyData, StandardCharsets.UTF_8, "");
         }
         return rawContent;
     }

@@ -12,8 +12,8 @@
         <lombok.version>1.16.14</lombok.version>
         <spring.cloud.version>Hoxton.SR5</spring.cloud.version>
         <spring.boot.version>2.3.1.RELEASE</spring.boot.version>
-        <spring.fegin.version>1.4.6.RELEASE</spring.fegin.version>
-        <fegin.http.version>9.5.0</fegin.http.version>
+        <spring.fegin.version>2.1.1.RELEASE</spring.fegin.version>
+        <fegin.http.version>10.1.0</fegin.http.version>
     </properties>
 
     <dependencyManagement>
@@ -57,23 +57,28 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-feign</artifactId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
             <version>${spring.fegin.version}</version>
             <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-httpclient</artifactId>
             <version>${fegin.http.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-            <groupId>org.springframework.boot</groupId>
-            <version>1.5.16.RELEASE</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.6</version>
+            <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>26.0-jre</version>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>org.apache.httpcomponents</groupId>-->
             <!--<artifactId>httpclient</artifactId>-->
