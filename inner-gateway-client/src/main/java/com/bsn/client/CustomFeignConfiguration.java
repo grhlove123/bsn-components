@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @ConditionalOnWebApplication
 @ConditionalOnProperty(name = "proxy.enable")
-@ConditionalOnClass({Decoder.class,ErrorDecoder.class,Request.Options.class})
+@ConditionalOnClass({Decoder.class,ErrorDecoder.class,Request.Options.class,ApacheHttpClient.class})
 public class CustomFeignConfiguration {
     private final ScheduledExecutorService connectionManagerTimer = new ScheduledThreadPoolExecutor(1, new ThreadFactoryBuilder().setNameFormat("HttpConnectionManager-%d").setDaemon(true).build());
 
